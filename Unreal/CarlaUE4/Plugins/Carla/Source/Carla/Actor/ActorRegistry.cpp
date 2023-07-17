@@ -33,6 +33,10 @@ static FCarlaActor::ActorType FActorRegistry_GetActorType(const AActor *Actor)
   {
     return FCarlaActor::ActorType::Walker;
   }
+  else if (nullptr != Cast<ACarlaScoomaticBase>(Actor))
+  {
+    return FCarlaActor::ActorType::Scoomatic;
+  }
   else if (nullptr != Cast<ATrafficLightBase>(Actor))
   {
     return FCarlaActor::ActorType::TrafficLight;

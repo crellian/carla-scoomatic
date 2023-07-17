@@ -7,6 +7,7 @@
 #include "Carla.h"
 #include "Carla/Sensor/CollisionSensor.h"
 
+#include "carla/Logging.h"
 #include "Carla/Actor/ActorBlueprintFunctionLibrary.h"
 #include "Carla/Actor/ActorRegistry.h"
 #include "Carla/Game/CarlaEpisode.h"

@@ -15,6 +15,7 @@
 #include "Carla/Util/RayTracer.h"
 #include "Carla/Vehicle/CarlaWheeledVehicle.h"
 #include "Carla/Walker/WalkerController.h"
+#include "Carla/Scoomatic/CarlaScoomaticBase.h"
 #include "Carla/Walker/WalkerBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Carla/Game/Tagger.h"
@@ -63,6 +64,8 @@
 #include <carla/rpc/Texture.h>
 #include <carla/rpc/MaterialParameter.h>
 #include <compiler/enable-ue4-macros.h>
+
+#include <carla/rpc/ScoomaticControl.h>
 
 #include <vector>
 #include <map>
@@ -1500,6 +1503,26 @@ void FCarlaServer::FPimpl::BindActions()
     return R<void>::Success();
   };
 
+    // Bind sync Scoomatic
+  BIND_SYNC(apply_control_to_scoomatic) << [this](
+    cr::ActorId ActorId,
+    cr::ScoomaticControl Control) -> R<void>
+  {
+    REQUIRE_CARLA_EPISODE();
+    FCarlaActor* CarlaActor = Episode->FindCarlaActor(ActorId);
+    if (!CarlaActor)
+    {
+      RESPOND_ERROR("unable to apply control: actor not found");
+    }
+    auto ScoomaticBase = Cast<ACarlaScoomaticBase>(CarlaActor->GetActor());
+    if (ScoomaticBase == nullptr)
+    {
+      RESPOND_ERROR("unable to apply control: actor is not a scoomatic");
+    }
+    ScoomaticBase->ApplyScoomaticControl(Control, EScoomaticInputPriority::Client);
+    return R<void>::Success();
+  };
+
   BIND_SYNC(set_actor_autopilot) << [this](
       cr::ActorId ActorId,
       bool bEnabled) -> R<void>
@@ -2052,6 +2075,7 @@ void FCarlaServer::FPimpl::BindActions()
       [=](auto, const C::ApplyVehicleControl &c) {  MAKE_RESULT(apply_control_to_vehicle(c.actor, c.control)); },
       [=](auto, const C::ApplyWalkerControl &c) {   MAKE_RESULT(apply_control_to_walker(c.actor, c.control)); },
       [=](auto, const C::ApplyVehiclePhysicsControl &c) {  MAKE_RESULT(apply_physics_control(c.actor, c.physics_control)); },
+      [=](auto, const C::ApplyScoomaticControl &c) {MAKE_RESULT(apply_control_to_scoomatic(c.actor, c.control)); }, // Scoomatic
       [=](auto, const C::ApplyTransform &c) {       MAKE_RESULT(set_actor_transform(c.actor, c.transform)); },
       [=](auto, const C::ApplyTargetVelocity &c) {  MAKE_RESULT(set_actor_target_velocity(c.actor, c.velocity)); },
       [=](auto, const C::ApplyTargetAngularVelocity &c) { MAKE_RESULT(set_actor_target_angular_velocity(c.actor, c.angular_velocity)); },

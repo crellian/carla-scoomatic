@@ -3,24 +3,22 @@
 //
 // This work is licensed under the terms of the MIT license.
 // For a copy, see <https://opensource.org/licenses/MIT>.
-
+#include<iostream>
 #include "Carla.h"
-#include "WheeledVehicleAIController.h"
+#include "ScoomaticBaseAIController.h"
 
-#include "MapGen/RoadMap.h"
-#include "Traffic/RoutePlanner.h"
-#include "Vehicle/CarlaWheeledVehicle.h"
-#include "Carla/CityMapGenerator.h"
-#include "Carla/Util/RandomEngine.h"
+// #include "MapGen/RoadMap.h"
+// #include "Traffic/RoutePlanner.h"
+#include "Scoomatic/CarlaScoomaticBase.h"
 
 #include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
-#include "WheeledVehicleMovementComponent.h"
+// #include "WheeledVehicleMovementComponent.h"
 
 // =============================================================================
 // -- Static local methods -----------------------------------------------------
 // =============================================================================
-
+/* TODO
 static bool RayCast(const AActor &Actor, const FVector &Start, const FVector &End)
 {
   FHitResult OutHit;
@@ -77,39 +75,43 @@ static void ClearQueue(std::queue<T> &Queue)
   std::queue<T> EmptyQueue;
   Queue.swap(EmptyQueue);
 }
+*/
 
 // =============================================================================
 // -- Constructor and destructor -----------------------------------------------
 // =============================================================================
 
-AWheeledVehicleAIController::AWheeledVehicleAIController(const FObjectInitializer &ObjectInitializer)
+AScoomaticBaseAIController::AScoomaticBaseAIController(const FObjectInitializer &ObjectInitializer)
   : Super(ObjectInitializer)
 {
+  /* TODO
   RandomEngine = CreateDefaultSubobject<URandomEngine>(TEXT("RandomEngine"));
 
   RandomEngine->Seed(RandomEngine->GenerateRandomSeed());
+  */
 
   PrimaryActorTick.bCanEverTick = true;
   PrimaryActorTick.TickGroup = TG_PrePhysics;
 }
 
-AWheeledVehicleAIController::~AWheeledVehicleAIController() {}
+AScoomaticBaseAIController::~AScoomaticBaseAIController() {}
 
 // =============================================================================
 // -- AController --------------------------------------------------------------
 // =============================================================================
 
-void AWheeledVehicleAIController::OnPossess(APawn *aPawn)
+void AScoomaticBaseAIController::OnPossess(APawn *aPawn)
 {
   Super::OnPossess(aPawn);
-
-  if (IsPossessingAVehicle())
+  if (IsPossessingAScoomatic())
   {
-    UE_LOG(LogCarla, Error, TEXT("Controller already possessing a vehicle!"));
+    UE_LOG(LogCarla, Error, TEXT("Controller already possessing a scoomatic!"));
     return;
   }
-  Vehicle = Cast<ACarlaWheeledVehicle>(aPawn);
-  check(Vehicle != nullptr);
+  Scoomatic = Cast<ACarlaScoomaticBase>(aPawn);
+  check(Scoomatic != nullptr);
+  
+  /*
   MaximumSteerAngle = Vehicle->GetMaximumSteerAngle();
   check(MaximumSteerAngle > 0.0f);
   ConfigureAutopilot(bAutopilotEnabled);
@@ -119,37 +121,39 @@ void AWheeledVehicleAIController::OnPossess(APawn *aPawn)
     TActorIterator<ACityMapGenerator> It(GetWorld());
     RoadMap = (It ? It->GetRoadMap() : nullptr);
   }
+  */
 }
 
-void AWheeledVehicleAIController::OnUnPossess()
+void AScoomaticBaseAIController::OnUnPossess()
 {
   Super::OnUnPossess();
 
-  Vehicle = nullptr;
+  Scoomatic = nullptr;
 }
 
-void AWheeledVehicleAIController::Tick(const float DeltaTime)
+void AScoomaticBaseAIController::Tick(const float DeltaTime)
 {
-  TRACE_CPUPROFILER_EVENT_SCOPE(AWheeledVehicleAIController::Tick);
   Super::Tick(DeltaTime);
 std::cout << "--------------------------------" << std::endl;
-  if (!IsPossessingAVehicle())
+
+  if (!IsPossessingAScoomatic())
   {
     return;
   }
 
   if (!bAutopilotEnabled && !bControlIsSticky)
   {
-    Vehicle->ApplyVehicleControl(FVehicleControl{}, EVehicleInputPriority::Relaxation);
+    // TODO Autopilot not implemented
+    // Vehicle->ApplyVehicleControl(FVehicleControl{}, EVehicleInputPriority::Relaxation);
   }
 
-  Vehicle->FlushVehicleControl();
+  Scoomatic->FlushScoomaticControl();
 }
 
 // =============================================================================
 // -- Autopilot ----------------------------------------------------------------
 // =============================================================================
-
+/*
 void AWheeledVehicleAIController::ConfigureAutopilot(const bool Enable, const bool KeepState)
 {
   bAutopilotEnabled = Enable;
@@ -170,11 +174,12 @@ void AWheeledVehicleAIController::ConfigureAutopilot(const bool Enable, const bo
 
   TrafficLightState = ETrafficLightState::Green;
 }
+*/
 
 // =============================================================================
 // -- Traffic ------------------------------------------------------------------
 // =============================================================================
-
+/*
 void AWheeledVehicleAIController::SetFixedRoute(
     const TArray<FVector> &Locations,
     const bool bOverwriteCurrent)
@@ -188,3 +193,4 @@ void AWheeledVehicleAIController::SetFixedRoute(
     TargetLocations.emplace(Location);
   }
 }
+*/

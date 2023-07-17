@@ -9,6 +9,7 @@
 
 #include "Carla/Traffic/TrafficSignBase.h"
 #include "Carla/Vehicle/CarlaWheeledVehicle.h"
+#include "Carla/Scoomatic/CarlaScoomaticBase.h"
 #include "Carla/Game/Tagger.h"
 #include "Carla/Traffic/TrafficLightBase.h"
 
@@ -85,6 +86,14 @@ FBoundingBox UBoundingBoxCalculator::GetActorBoundingBox(const AActor *Actor, ui
         UE_LOG(LogCarla, Warning, TEXT("Traffic sign missing trigger volume: %s"), *Actor->GetName());
         return {};
       }
+    }
+    // Scoomatic.
+    auto Scoomatic = Cast<ACarlaScoomaticBase>(Actor);
+    if (Scoomatic != nullptr)
+    {
+      FVector Origin = Scoomatic->GetScoomaticBoundingBoxTransform().GetTranslation();
+      FVector Extent = Scoomatic->GetScoomaticBoundingBoxExtent();
+      return {Origin, Extent};
     }
     // Other, by default BB
     TArray<FBoundingBox> BBs = GetBBsOfActor(Actor);
